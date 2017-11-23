@@ -90,6 +90,10 @@ func main() {
 	var configData = getConfig()
 	redisClient := createRedisClient(configData)
 
+	// serve static - admin interface
+	fs := http.FileServer(http.Dir(configData.AdminFilePath))
+	http.Handle("/admin/", http.StripPrefix("/admin/", fs))
+
 	// exclude favicon
 	http.HandleFunc("/favicon.ico", func(response http.ResponseWriter, r *http.Request) {})
 	// redirect Block
@@ -171,11 +175,81 @@ func main() {
 				return
 			}
 
-
 			response.WriteHeader(http.StatusCreated)
 			json.NewEncoder(response).Encode(createSuccessResponse(urlItem))
 			return
 		case http.MethodPatch:
+			var urlItem UrlItem
+			if request.Body == nil {
+				response.WriteHeader(http.StatusUnprocessableEntity)
+				json.NewEncoder(response).Encode(createErrorResponse("Please provide a PATCH message with `from_url` and `to_url`"))
+				return
+			}
+
+			err := json.NewDecoder(request.Body).Decode(&urlItem)
+			if err != nil {
+				buf := new(bytes.Buffer)
+				buf.ReadFrom(request.Body)
+				bodyString := buf.String()
+
+				response.WriteHeader(http.StatusUnprocessableEntity)
+				json.NewEncoder(response).Encode(json.NewEncoder(response).Encode(createErrorResponse("Could not process request. Invalid json received, got <" + bodyString + ">")))
+				return
+			}
+
+			duplicateValue, duplicateError := redisClient.Get(urlItem.FromUrl).Result()
+			if duplicateError == redis.Nil && duplicateValue == "" {
+				response.WriteHeader(http.StatusConflict)
+				json.NewEncoder(response).Encode(createErrorResponse("Could not find route for <" + urlItem.FromUrl + ">!"))
+				return
+			}
+
+			writeError := redisClient.Set(urlItem.FromUrl, urlItem.ToUrl, 0).Err()
+			if writeError != nil {
+				response.WriteHeader(http.StatusInternalServerError)
+				json.NewEncoder(response).Encode(createErrorResponse("Unexpected error has occurred when saving list data!"))
+				log.Println(writeError)
+				return
+			}
+			response.WriteHeader(http.StatusOK)
+			json.NewEncoder(response).Encode(createSuccessResponse(urlItem))
+			return
+		case http.MethodDelete:
+			var item = strings.Trim(html.EscapeString(request.URL.Path), "/url")
+			fmt.Println(item)/*
+			var urlItem UrlItem
+			if request.Body == nil {
+				response.WriteHeader(http.StatusUnprocessableEntity)
+				json.NewEncoder(response).Encode(createErrorResponse("Please provide a PATCH message with `from_url` and `to_url`"))
+				return
+			}
+			err := json.NewDecoder(request.Body).Decode(&urlItem)
+			if err != nil {
+				buf := new(bytes.Buffer)
+				buf.ReadFrom(request.Body)
+				bodyString := buf.String()
+
+				response.WriteHeader(http.StatusUnprocessableEntity)
+				json.NewEncoder(response).Encode(json.NewEncoder(response).Encode(createErrorResponse("Could not process request. Invalid json received, got <" + bodyString + ">")))
+				return
+			}
+
+			duplicateValue, duplicateError := redisClient.Get(urlItem.FromUrl).Result()
+			if duplicateError == redis.Nil && duplicateValue == "" {
+				response.WriteHeader(http.StatusConflict)
+				json.NewEncoder(response).Encode(createErrorResponse("Could not find route for <" + urlItem.FromUrl + ">!"))
+				return
+			}
+
+			writeError := redisClient.Set(urlItem.FromUrl, urlItem.ToUrl, 0).Err()
+			if writeError != nil {
+				response.WriteHeader(http.StatusInternalServerError)
+				json.NewEncoder(response).Encode(createErrorResponse("Unexpected error has occurred when saving list data!"))
+				log.Println(writeError)
+				return
+			}
+			response.WriteHeader(http.StatusOK)
+			json.NewEncoder(response).Encode(createSuccessResponse(urlItem))*/
 			return
 		case http.MethodGet:
 			// establish base items
