@@ -1,0 +1,20 @@
+version: '3.1'
+services:
+  goshorturl:
+    build:
+      context: ./docker/http/
+    networks:
+      - default
+    ports:
+      - 9293:80
+  redis:
+    build:
+      context: ./docker/redis
+    networks:
+      - default
+    ports:
+      - 6370:6379
+networks:
+  default:
+  proxy:
+    external: true
