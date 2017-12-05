@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>NeedleShort URL Admin</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+    <style>
+        body { background-color: #F5F5F5; letter-spacing: .01em; font-family: Arial,sans-serif; }
+        .bg-red,
+        .thead-red {
+            background-color: #cb213d;
+            color: #fff;
+        }
+        .table-small-text {
+            font-size: 13px;
+        }
+        .page-item.active .page-link,
+        .btn-primary { background:#cb213d; border-color:#aa162e; }
+        .btn-primary:hover { background-color:#aa162e; border-color: #cb213d; }
+
+        .hidden {
+            display: none;
+            visibility: hidden;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-light bg-red">
+    <div class="container">
+        <div class="row" style="width: 100%;">
+            <div class="col-md-9">
+                <h4 class="text-white" style="margin-bottom: 0">ShortURL</h4>
+            </div>
+            <div class="col-md-3">
+                <button class="btn btn-outline-light btn-sm float-right" id="add_new" onclick="showAddModal();">Add New</button>
+            </div>
+        </div>
+    </div>
+</nav>
+<div class="clear-fix"></div>
+<div class="container mt-3">
+    <div class="row">
+        <div class="col-xs-12 col-md-12 col-lg-12">
+            <div class="card">
+                <div class="card-header">
+                    Defined ShortUrls
+                </div>
+                <div class="card-body">
+                    <table class="table table-striped table-small-text">
+                        <thead class="thead-red">
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">From URL</th>
+                            <th scope="col">To URL</th>
+                            <th scope="col">Options</th>
+                        </tr>
+                        </thead>
+                        <tbody id="list">
+                        </tbody>
+                    </table>
+                </div>
+                <div class="card-footer text-muted">
+                    <ul class="pagination pagination-sm justify-content-center" id="pagination">
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal" tabindex="-1" role="dialog" id="update_url">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add/Update SHORT Url</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form onsubmit="return addNewElement();">
+                    <div class="form-group">
+                        <label for="toURL">To URL:</label>
+                        <input type="text" class="form-control" id="to_url" aria-describedby="toURL" placeholder="Where to redirect clients">
+                        <small id="toURL" class="form-text text-muted">Represents the "long" URL, where you want the client to arrive.</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="fromURL">From URL:</label>
+                        <div class="input-group mb-2 mb-sm-0">
+                            <div class="input-group-addon"></div>
+                            <input type="text" class="form-control" id="from_url" aria-describedby="fromURL" placeholder="The short URL">
+                        </div>
+                        <small id="from_url" class="form-text text-muted">Leave empty if you wish to generate a random short Url.</small>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary rel-add" onclick="addNewElement()">Add</button>
+                <button type="button" class="btn btn-primary hidden rel-update" onclick="updateElement()">Update</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal" tabindex="-1" role="dialog" id="alert-modal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Info</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Modal body text goes here.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
+<script>
+var config = {
+    base_url: "http://127.0.0.1:9293/"
+};
+$(document).ready(function () {
+    $('.input-group-addon').html(config.base_url);
+});
+</script>
+<script src="base.js"></script>
+<script src="custom.js"></script>
+</body>
+</html>
