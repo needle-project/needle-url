@@ -7,6 +7,9 @@ import (
 	"github.com/go-redis/redis"
 	"strconv"
 	"github.com/gorilla/mux"
+	"strings"
+	"os"
+	"encoding/base64"
 )
 
 /**
@@ -27,6 +30,11 @@ func main() {
 
 	// delete item
 	router.HandleFunc("/url/{pathReference}", func(w http.ResponseWriter, r *http.Request) {
+		user, pass, _ := r.BasicAuth()
+		if user != configData.BasicAuth.Username && pass != configData.BasicAuth.Password {
+			http.Error(w, "Unauthorized.", 401)
+			return
+		}
 		w.Header().Set("Content-Type", "application/json")
 		vars := mux.Vars(r)
 		DeleteHandler(w, r, vars["pathReference"], redisClient)
@@ -34,18 +42,33 @@ func main() {
 
 	// create item
 	router.HandleFunc("/url", func(w http.ResponseWriter, r *http.Request) {
+		user, pass, _ := r.BasicAuth()
+		if user != configData.BasicAuth.Username && pass != configData.BasicAuth.Password {
+			http.Error(w, "Unauthorized.", 401)
+			return
+		}
 		w.Header().Set("Content-Type", "application/json")
 		createHandler(w, r, redisClient)
 	}).Methods("POST")
 
 	// handle update item
 	router.HandleFunc("/url", func(w http.ResponseWriter, r *http.Request) {
+		user, pass, _ := r.BasicAuth()
+		if user != configData.BasicAuth.Username && pass != configData.BasicAuth.Password {
+			http.Error(w, "Unauthorized.", 401)
+			return
+		}
 		w.Header().Set("Content-Type", "application/json")
 		updateHandler(w, r, redisClient)
 	}).Methods("PATCH")
 
 	// get all items
 	router.HandleFunc("/url", func(w http.ResponseWriter, r *http.Request) {
+		user, pass, _ := r.BasicAuth()
+		if user != configData.BasicAuth.Username && pass != configData.BasicAuth.Password {
+			http.Error(w, "Unauthorized.", 401)
+			return
+		}
 		w.Header().Set("Content-Type", "application/json")
 		fetchHandler(w, r, redisClient)
 	}).Methods("GET")
@@ -58,10 +81,58 @@ func main() {
 
 	// admin interface
 	// serve static - admin interface
-	fs := http.FileServer(http.Dir(configData.AdminFilePath))
-	http.Handle("/admin/", http.StripPrefix("/admin/", fs))
+	http.HandleFunc("/admin-test/", func(w http.ResponseWriter, r *http.Request) {
+		authenticate(w, r, configData, true)
+
+		pathSegments := strings.Split(string(r.URL.Path), "/")
+		pathSegments = pathSegments[2:]
+
+		// if last element is a directory, search for "index.html"
+		if pathSegments[len(pathSegments) - 1] == "" {
+			pathSegments[len(pathSegments) - 1] = "index.html"
+		}
+
+		filePath := configData.AdminFilePath + strings.Join(pathSegments, string(os.PathSeparator))
+		if _, err := os.Stat(filePath); os.IsNotExist(err) {
+			http.Error(w, "Page not found!", 404)
+			log.Println("Requested", filePath , "which does not exists!")
+			return
+		}
+
+		http.ServeFile(w, r, filePath)
+	})
+
+
+	http.Handle("/admin/", http.StripPrefix("/admin/", http.FileServer(http.Dir(configData.AdminFilePath))))
 	http.Handle("/", router)
 
 	fmt.Println("Starting server on port " + strconv.Itoa(configData.Port))
 	log.Fatal(http.ListenAndServe(":" + strconv.Itoa(configData.Port), nil))
+}
+
+func authenticate(w http.ResponseWriter, r *http.Request, configData ConfigJson, withRequest bool) {
+	if withRequest {
+		w.Header().Set("WWW-Authenticate", `Basic realm="Please provide authentication details"`)
+	}
+	user, pass, _ := r.BasicAuth()
+	if user != configData.BasicAuth.Username || pass != configData.BasicAuth.Password {
+		log.Println("Could not authenticate with", user, "and", pass, "from user", r.RemoteAddr)
+		http.Error(w, "Unauthorized.", 401)
+		return
+	}
+	// if we force the "pop-up" the we are sure that is the interface
+	// and we can write a cookie so we can forward the authentication
+	// for the API calls
+	if withRequest {
+		encodedCredentials := base64.StdEncoding.EncodeToString([]byte(user + ":" + pass))
+
+		cookie := http.Cookie{}
+		cookie.Name = "foobar"
+		cookie.Value = encodedCredentials
+		cookie.Path = "/"
+		cookie.MaxAge = 0
+		cookie.Secure = false
+		cookie.HttpOnly = false
+		http.SetCookie(w, &cookie)
+	}
 }

@@ -8,13 +8,19 @@ import (
 )
 
 type ConfigJson struct {
-	Port 			int 	`json:"port"`
-	RedisHostname 	string 	`json:"redis_hostname"`
-	RedisPassword	string	`json:"redis_password"`
-	RedisPort 		int 	`json:"redis_port"`
-	RedisDb 		int 	`json:"redis_db"`
-	DefaultRedirect	string 	`json:"default_redirect_path"`
-	AdminFilePath	string 	`json:"admin_path"`
+	Port 			int 					`json:"port"`
+	RedisHostname 	string 					`json:"redis_hostname"`
+	RedisPassword	string					`json:"redis_password"`
+	RedisPort 		int 					`json:"redis_port"`
+	RedisDb 		int 					`json:"redis_db"`
+	DefaultRedirect	string 					`json:"default_redirect_path"`
+	AdminFilePath	string 					`json:"admin_path"`
+	BasicAuth		BasicAuthCredentials 	`json:"basic_auth"`
+}
+
+type BasicAuthCredentials struct {
+	Username	string 	`json:"username"`
+	Password	string 	`json:"password"`
 }
 
 /**
