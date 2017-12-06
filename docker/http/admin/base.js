@@ -22,8 +22,12 @@ var needleApp = {
         var perPage = 20;
         pageNr = (pageNr === undefined) ? 1 : pageNr;
         var offset = (pageNr * perPage) - perPage;
+        console.log("HERE");
         $.ajax({
             url: "/url?offset=" + offset,
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader ("Authorization", "Basic " + document.cookie.replace("btoa=",""));
+            },
             success: function (response) {
                 needleApp.getWriter().writeListResponse(response, perPage, offset, pageNr);
             }
@@ -36,6 +40,9 @@ var needleApp = {
             data: JSON.stringify({to_url: toUrl, from_url: fromUrl}),
             contentType: "application/json; charset=utf-8",
             dataType: "json",
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader ("Authorization", "Basic " + document.cookie.replace("btoa=",""));
+            },
             success: function (response) {
                 needleApp.getWriter().writeNewResponse(response);
             },
@@ -51,6 +58,9 @@ var needleApp = {
             data: JSON.stringify({to_url: toUrl, from_url: fromUrl}),
             contentType: "application/json; charset=utf-8",
             dataType: "json",
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader ("Authorization", "Basic " + document.cookie.replace("btoa=",""));
+            },
             success: function (response) {
                 needleApp.getWriter().writeUpdateResponse(response);
             },
@@ -66,6 +76,9 @@ var needleApp = {
         $.ajax({
             url: "/url/" + fromUrl,
             method: "DELETE",
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader ("Authorization", "Basic " + document.cookie.replace("btoa=",""));
+            },
             success: function (response) {
                 needleApp.getWriter().writeRemoveResponse(response, fromUrl);
             },

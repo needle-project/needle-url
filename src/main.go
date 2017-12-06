@@ -127,7 +127,7 @@ func authenticate(w http.ResponseWriter, r *http.Request, configData ConfigJson,
 		encodedCredentials := base64.StdEncoding.EncodeToString([]byte(user + ":" + pass))
 
 		cookie := http.Cookie{}
-		cookie.Name = "foobar"
+		cookie.Name = "btoa"
 		cookie.Value = encodedCredentials
 		cookie.Path = "/"
 		cookie.MaxAge = 0

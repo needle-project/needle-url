@@ -4,5 +4,9 @@
   "redis_port": 6379,
   "redis_db": 0,
   "default_redirect_path": "https://www.example.com/",
-  "admin_path": "/bin/needle-url/admin/"
+  "admin_path": "/bin/needle-url/admin/",
+  "basic_auth": {
+    "username": "test",
+    "password": "new"
+  }
 }
