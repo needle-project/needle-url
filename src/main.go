@@ -30,11 +30,7 @@ func main() {
 
 	// delete item
 	router.HandleFunc("/url/{pathReference}", func(w http.ResponseWriter, r *http.Request) {
-		user, pass, _ := r.BasicAuth()
-		if user != configData.BasicAuth.Username && pass != configData.BasicAuth.Password {
-			http.Error(w, "Unauthorized.", 401)
-			return
-		}
+		authenticate(w, r, configData, false)
 		w.Header().Set("Content-Type", "application/json")
 		vars := mux.Vars(r)
 		DeleteHandler(w, r, vars["pathReference"], redisClient)
@@ -42,33 +38,21 @@ func main() {
 
 	// create item
 	router.HandleFunc("/url", func(w http.ResponseWriter, r *http.Request) {
-		user, pass, _ := r.BasicAuth()
-		if user != configData.BasicAuth.Username && pass != configData.BasicAuth.Password {
-			http.Error(w, "Unauthorized.", 401)
-			return
-		}
+		authenticate(w, r, configData, false)
 		w.Header().Set("Content-Type", "application/json")
 		createHandler(w, r, redisClient)
 	}).Methods("POST")
 
 	// handle update item
 	router.HandleFunc("/url", func(w http.ResponseWriter, r *http.Request) {
-		user, pass, _ := r.BasicAuth()
-		if user != configData.BasicAuth.Username && pass != configData.BasicAuth.Password {
-			http.Error(w, "Unauthorized.", 401)
-			return
-		}
+		authenticate(w, r, configData, false)
 		w.Header().Set("Content-Type", "application/json")
 		updateHandler(w, r, redisClient)
 	}).Methods("PATCH")
 
 	// get all items
 	router.HandleFunc("/url", func(w http.ResponseWriter, r *http.Request) {
-		user, pass, _ := r.BasicAuth()
-		if user != configData.BasicAuth.Username && pass != configData.BasicAuth.Password {
-			http.Error(w, "Unauthorized.", 401)
-			return
-		}
+		authenticate(w, r, configData, false)
 		w.Header().Set("Content-Type", "application/json")
 		fetchHandler(w, r, redisClient)
 	}).Methods("GET")
@@ -98,10 +82,8 @@ func main() {
 			log.Println("Requested", filePath , "which does not exists!")
 			return
 		}
-
 		http.ServeFile(w, r, filePath)
 	})
-
 
 	http.Handle("/admin/", http.StripPrefix("/admin/", http.FileServer(http.Dir(configData.AdminFilePath))))
 	http.Handle("/", router)
