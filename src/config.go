@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 )
 
-
 // Default ConfigObject
 type ConfigJson struct {
 	Port            int                     `json:"port"`
@@ -27,9 +26,7 @@ type BasicAuthCredentials struct {
 	Password	string 	`json:"password"`
 }
 
-/**
- * Get all config data
- */
+// Fetch configuration data
 func getConfig() ConfigJson {
 	rawFile, e := ioutil.ReadFile("./config.json")
 	if e != nil {

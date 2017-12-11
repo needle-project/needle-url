@@ -17,9 +17,7 @@ type UrlItem struct {
 	ToUrl   string  `json:"to_url"`
 }
 
-/**
- * Handle redirection
- */
+// handle redirect
 func RedirectHandler(response http.ResponseWriter, request *http.Request, path string, redisClient *redis.Client, configData ConfigJson) {
 	var redirectUrl string
 
@@ -36,9 +34,7 @@ func RedirectHandler(response http.ResponseWriter, request *http.Request, path s
 	return
 }
 
-/**
- * Handle deletion of items
- */
+// Handle deletion of items
 func DeleteHandler(response http.ResponseWriter, request *http.Request, path string, redisClient *redis.Client) {
 	_, err := redisClient.Get(path).Result()
 	if err != nil && err.Error() != "EOF" {
@@ -91,9 +87,7 @@ func DeleteHandler(response http.ResponseWriter, request *http.Request, path str
 	return
 }
 
-/**
- * Handle create resource
- */
+// Handle create resource
 func createHandler(response http.ResponseWriter, request *http.Request, redisClient *redis.Client) {
 	var urlItem UrlItem
 	if request.Body == nil {
@@ -173,9 +167,7 @@ func createHandler(response http.ResponseWriter, request *http.Request, redisCli
 	return
 }
 
-/**
- * Update Resource
- */
+// Update Resource
 func updateHandler(response http.ResponseWriter, request *http.Request, redisClient *redis.Client) {
 	var urlItem UrlItem
 	if request.Body == nil {
@@ -214,6 +206,7 @@ func updateHandler(response http.ResponseWriter, request *http.Request, redisCli
 	return
 }
 
+// Fetch list
 func fetchHandler(response http.ResponseWriter, request *http.Request, redisClient *redis.Client) {
 	// establish base items
 	limit := request.URL.Query().Get("limit")
