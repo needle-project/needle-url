@@ -18,9 +18,9 @@ import (
 func main() {
 	var configData = getConfig()
 	redisClient := redis.NewClient(&redis.Options{
-		Addr:     configData.RedisHostname + ":" + strconv.Itoa(configData.RedisPort),
-		Password: configData.RedisPassword,
-		DB:       configData.RedisDb,
+		Addr:       configData.RedisHostname + ":" + strconv.Itoa(configData.RedisPort),
+		Password:   configData.RedisPassword,
+		DB:         configData.RedisDb,
 		MaxRetries: 5,
 	})
 

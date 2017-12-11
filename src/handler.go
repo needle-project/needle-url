@@ -11,9 +11,10 @@ import (
 	"time"
 )
 
+// Main form of a ShortUrl item
 type UrlItem struct {
-	FromUrl		string	`json:"from_url"`
-	ToUrl		string	`json:"to_url"`
+	FromUrl string  `json:"from_url"`
+	ToUrl   string  `json:"to_url"`
 }
 
 /**
@@ -121,7 +122,6 @@ func createHandler(response http.ResponseWriter, request *http.Request, redisCli
 	if urlItem.FromUrl == "" {
 		for {
 			var pendingGeneratedToUrl = generateHash()
-
 			_, duplicateError := redisClient.Get(pendingGeneratedToUrl).Result()
 			if duplicateError == redis.Nil || duplicateError == nil {
 				urlItem.FromUrl = pendingGeneratedToUrl
@@ -281,7 +281,7 @@ func fetchHandler(response http.ResponseWriter, request *http.Request, redisClie
 	return
 }
 
-
+// Reverse a list showing the last item as first
 func reverseList(input []string) []string {
 	if len(input) == 0 {
 		return input
@@ -289,9 +289,7 @@ func reverseList(input []string) []string {
 	return append(reverseList(input[1:]), input[0])
 }
 
-/**
- * Generate a random HASH
- */
+// Generate a random HASH
 func generateHash() string {
 	adler32Int := adler32.Checksum([]byte(time.Now().String()))
 	return strconv.FormatUint(uint64(adler32Int), 16)

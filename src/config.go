@@ -7,17 +7,21 @@ import (
 	"encoding/json"
 )
 
+
+// Default ConfigObject
 type ConfigJson struct {
-	Port 			int 					`json:"port"`
-	RedisHostname 	string 					`json:"redis_hostname"`
-	RedisPassword	string					`json:"redis_password"`
-	RedisPort 		int 					`json:"redis_port"`
-	RedisDb 		int 					`json:"redis_db"`
-	DefaultRedirect	string 					`json:"default_redirect_path"`
-	AdminFilePath	string 					`json:"admin_path"`
-	BasicAuth		BasicAuthCredentials 	`json:"basic_auth"`
+	Port            int                     `json:"port"`
+	RedisHostname   string                  `json:"redis_hostname"`
+	RedisPassword   string                  `json:"redis_password"`
+	RedisPort       int                     `json:"redis_port"`
+	RedisDb         int                     `json:"redis_db"`
+	DefaultRedirect string                  `json:"default_redirect_path"`
+	AdminFilePath   string                  `json:"admin_path"`
+	BasicAuth       BasicAuthCredentials    `json:"basic_auth"`
 }
 
+// Should map BasicAuth parameters
+// It should be used as a part of ConfigJson
 type BasicAuthCredentials struct {
 	Username	string 	`json:"username"`
 	Password	string 	`json:"password"`
