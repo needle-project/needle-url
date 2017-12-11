@@ -19,7 +19,7 @@ docker build .
 ```
 
 ### 1.2. Install as a standalone
-To use the application as a standalone, you can use one of the builds from `/build/` directory.
+To use the application as a standalone, you can use one of the builds from `/dist/` directory.
 
 ## 2. Usage
 
@@ -40,8 +40,9 @@ The application needs a `config.json` file that should be located in the same pa
 }
 ```
 Description:
-| Parameter | Description
-| ------------- |:-------------:| -----:|
+
+| Parameter | Description |
+| --- | --- |
 | port | The port on which the server will bind. Usually is 80 |
 | redis_hostname | Redis connection hostname/IP |
 | redis_port | Redis connection PORT |
