@@ -25,13 +25,13 @@ func RedirectHandler(response http.ResponseWriter, request *http.Request, path s
 	val, err := redisClient.Get(path).Result()
 	if err != nil && err.Error() != "EOF" {
 		log.Println("[INFO] No URL found for ", path, " got ", err.Error())
-		http.Redirect(response, request, configData.DefaultRedirect, 307)
+		http.Redirect(response, request, configData.DefaultRedirect, http.StatusTemporaryRedirect)
 		return
 	}
 	redirectUrl = val
 
 	log.Println("[INFO] Redirected ", path, " to ", redirectUrl)
-	http.Redirect(response, request, redirectUrl, 301)
+	http.Redirect(response, request, redirectUrl, http.StatusMovedPermanently)
 	return
 }
 

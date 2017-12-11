@@ -33,6 +33,14 @@ func getConfig() ConfigJson {
 		os.Exit(1)
 	}
 	var configJson ConfigJson
+	// fill with defaults that will be overridden by configJson
+	configJson.Port = 80
+	configJson.RedisHostname = "127.0.0.1"
+	configJson.RedisPort = 6379
+	configJson.RedisDb = 0
+
+	configJson.AdminFilePath = ""
+
 	json.Unmarshal(rawFile, &configJson)
 	return configJson
 }

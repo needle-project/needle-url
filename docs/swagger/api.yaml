@@ -1,0 +1,293 @@
+swagger: '2.0'
+info:
+  version: '1'
+  title: ShortURL API
+  description: ''
+host: www.adore.me
+basePath: /
+produces:
+  - application/json
+paths:
+  '/{ShortUrl}':
+    get:
+      description: |
+        The item 
+      parameters:
+        - in: path
+          name: ShortUrl
+          type: string
+          required: true
+          description: The "FromUrl" that reference a long URL
+      responses:
+        '301':
+          description: Successful redirect to long URL
+        '307':
+          description: >-
+            Redirect to a BaseURL. This may occur if internal dependencies are
+            down (ex: Redis Db)
+  /url:
+    get:
+      description: |
+        Fetch all defined ShortURL's
+      security:
+        - basicAuth: []
+      parameters:
+        - in: query
+          name: limit
+          type: integer
+          required: false
+          description: >-
+            The number of items to be retrieved on request. If not set, default
+            value is 20.
+        - in: query
+          name: offset
+          type: integer
+          required: false
+          description: >-
+            The offset from where to start the list. If not set, default value
+            is 0.
+        - in: query
+          name: item
+          type: string
+          required: false
+          description: The "from_url" keyword to retrive a specific element.
+      responses:
+        '200':
+          description: Successful response
+          schema:
+            type: object
+            properties:
+              total:
+                type: integer
+                example: 1
+                description: Total amount of defined short-urls
+              list:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    from_url:
+                      type: string
+                      description: The URI for for the ShortURL
+                    to_url:
+                      type: string
+                      description: Fully qualified URL were the client should be redirected
+    post:
+      description: |
+        Create a new ShortURL item
+      security:
+        - basicAuth: []
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          name: item
+          description: The SHORT Url to be created
+          schema:
+            type: object
+            required:
+              - to_url
+            properties:
+              to_url:
+                type: string
+                example: 'https://www.yourdomain.com/'
+                description: The short URI
+              from_url:
+                type: string
+                example: abc
+                description: >-
+                  The short URI. If the parameters is omitted, a generated
+                  ADLER32 hash will be used
+      responses:
+        '200':
+          description: Successful response
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: ok
+                description: Status of the response
+              url:
+                type: object
+                properties:
+                  to_url:
+                    type: string
+                    example: 'https://www.yourdomain.com/'
+                    description: The short URI
+                  from_url:
+                    type: string
+                    example: abc
+                    description: The requested URI
+        '409':
+          description: Conflict - Duplicate item request
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: error
+                description: Status of the response
+              message:
+                type: string
+                example: 'A route for [request.from_url] already exists!'
+                description: This will occur when trying to created a duplicate ShortURL
+        '422':
+          description: Unprocessable Entity
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: error
+                description: Status of the response
+              message:
+                type: string
+                example: Please provide a POST message with `from_url` and `to_url`
+                description: >-
+                  This can in more than 1 cases: either no POST Body was
+                  received or Invalid JSON Body
+        '500':
+          description: Internal server error
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: error
+                description: Status of the response
+              message:
+                type: string
+                example: Unexpected error has occurred when saving list data
+                description: >-
+                  This may occur when internal dependencies (ex: redis) is
+                  unresposive
+    patch:
+      description: |
+        Update a defined SortURL
+      security:
+        - basicAuth: []
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          name: item
+          description: The ShortURL that will be updated
+          schema:
+            type: object
+            required:
+              - to_url
+              - from_url
+            properties:
+              to_url:
+                type: string
+                example: 'https://www.yourdomain.com/'
+                description: The URL to be modified
+              from_url:
+                type: string
+                example: abc
+                description: >-
+                  This value should be reffering to the one that should be
+                  updated
+      responses:
+        '200':
+          description: Successful response
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: ok
+                description: Status of the response
+              url:
+                type: object
+                properties:
+                  to_url:
+                    type: string
+                    example: 'https://www.yourdomain.com/'
+                    description: The short URI
+                  from_url:
+                    type: string
+                    example: abc
+                    description: The requested URI
+        '422':
+          description: Unprocessable Entity
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: error
+                description: Status of the response
+              message:
+                type: string
+                example: Please provide a PATCH message with `from_url` and `to_url`
+                description: >-
+                  This can in more than 1 cases: either no PATCH Body was
+                  received or Invalid JSON Body
+        '500':
+          description: Internal server error
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: error
+                description: Status of the response
+              message:
+                type: string
+                example: Unexpected error has occurred when saving list data
+                description: >-
+                  This may occur when internal dependencies (ex: redis) is
+                  unresposive
+  '/url/{FromUrl}':
+    delete:
+      description: |
+        Delete an item
+      security:
+        - basicAuth: []
+      parameters:
+        - in: path
+          name: FromUrl
+          type: string
+          required: true
+          description: The "FromUrl" that needs to be deleted
+      responses:
+        '200':
+          description: Successful response
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: ok
+              message:
+                type: string
+                example: '[fromUrl] deleted with success'
+        '404':
+          description: Not Found
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: error
+                description: Status of the response
+              message:
+                type: string
+                example: 'Could not find route for [fromUrl]'
+        '500':
+          description: Internal server error
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: error
+                description: Status of the response
+              message:
+                type: string
+                example: Unexpected error has occurred when saving list data
+                description: >-
+                  This may occur when internal dependencies (ex: redis) is
+                  unresponsive

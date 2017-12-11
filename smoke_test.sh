@@ -7,7 +7,8 @@ YELLOW="\033[38;5;11m"
 RESET="\033[0m"
 
 BASEURL="https://adrian.tilita.ro/"
-APPURL="https://127.0.0.1:9293/"
+APPURL="http://127.0.0.1:9293/"
+AUTH="test:new"
 
 paddash=$(printf '%0.1s' "-"{1..60})
 padspace=$(printf '%0.1s' " "{1..60})
@@ -24,11 +25,12 @@ function showresult {
 echo "${YELLOW}Running smoke tests${RESET}"
 echo "${YELLOW}${paddash}${RESET}"
 
+
 # Delete first if any legacy left
-curl -o /dev/null --silent -H "Content-Type: application/json" -X DELETE ${APPURL}url/check-redirect
+curl -o /dev/null --silent -u ${AUTH} -H "Content-Type: application/json" -X DELETE ${APPURL}url/check-redirect
 
 # Create new
-HTTP_CALL=$(curl -o /dev/null --silent -H "Content-Type: application/json" -X POST -d '{"from_url": "check-redirect","to_url": "${BASEURL}"}' --write-out '%{http_code}' http://localhost:9293/url)
+HTTP_CALL=$(curl -o /dev/null --silent -u ${AUTH} -H "Content-Type: application/json" -X POST -d '{"from_url": "check-redirect","to_url": "http://example.com"}' --write-out '%{http_code}' ${APPURL}url)
 IFS='-' read -r -a HTTP_STATUS <<< "$HTTP_CALL"
 
 leftstring="CREATE NEW"
@@ -44,7 +46,7 @@ if [ ${HTTP_STATUS} -ne 201 ]
 fi
 
 # Create duplicate
-HTTP_CALL=$(curl -o /dev/null --silent -H "Content-Type: application/json" -X POST -d '{"from_url": "check-redirect","to_url": "${BASEURL}"}' --write-out '%{http_code}' http://localhost:9293/url)
+HTTP_CALL=$(curl -o /dev/null --silent -u ${AUTH} -H "Content-Type: application/json" -X POST -d '{"from_url": "check-redirect","to_url": "http://example.com"}' --write-out '%{http_code}' ${APPURL}url)
 IFS='-' read -r -a HTTP_STATUS <<< "$HTTP_CALL"
 
 leftstring="CREATE DUPLICATE"
@@ -60,7 +62,7 @@ if [ ${HTTP_STATUS} -ne 409 ]
 fi
 
 # Call
-HTTP_CALL=$(curl -o /dev/null --silent -H "Content-Type: application/json" --write-out '%{http_code}' http://localhost:9293/check-redirect)
+HTTP_CALL=$(curl -o /dev/null --silent -u ${AUTH} -H "Content-Type: application/json" --write-out '%{http_code}' ${APPURL}check-redirect)
 IFS='-' read -r -a HTTP_STATUS <<< "$HTTP_CALL"
 
 leftstring="REDIRECT URL"
@@ -76,7 +78,7 @@ if [ ${HTTP_STATUS} -ne 301 ]
 fi
 
 # Update
-HTTP_CALL=$(curl -o /dev/null --silent -H "Content-Type: application/json" -X PATCH -d '{"from_url": "check-redirect","to_url": "https://www.github.com"}' --write-out '%{http_code}' http://localhost:9293/url)
+HTTP_CALL=$(curl -o /dev/null --silent -u ${AUTH} -H "Content-Type: application/json" -X PATCH -d '{"from_url": "check-redirect","to_url": "https://www.github.com"}' --write-out '%{http_code}' ${APPURL}url)
 IFS='-' read -r -a HTTP_STATUS <<< "$HTTP_CALL"
 
 leftstring="UPDATE URL"
@@ -92,7 +94,7 @@ if [ ${HTTP_STATUS} -ne 200 ]
 fi
 
 # Update
-HTTP_CALL=$(curl -o /dev/null --silent -H "Content-Type: application/json" -X DELETE --write-out '%{http_code}' http://localhost:9293/url/check-redirect)
+HTTP_CALL=$(curl -o /dev/null --silent -u ${AUTH} -H "Content-Type: application/json" -X DELETE --write-out '%{http_code}' ${APPURL}url/check-redirect)
 IFS='-' read -r -a HTTP_STATUS <<< "$HTTP_CALL"
 
 leftstring="DELETE URL"
@@ -108,7 +110,7 @@ if [ ${HTTP_STATUS} -ne 200 ]
 fi
 
 # Call
-HTTP_CALL=$(curl -o /dev/null --silent -H "Content-Type: application/json" --write-out '%{http_code}' http://localhost:9293/check-redirect)
+HTTP_CALL=$(curl -o /dev/null --silent -u ${AUTH} -H "Content-Type: application/json" --write-out '%{http_code}' ${APPURL}check-redirect)
 IFS='-' read -r -a HTTP_STATUS <<< "$HTTP_CALL"
 
 leftstring="REDIRECT URL"
